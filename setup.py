@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-import oauth2
+import oauth2_provider
 
 setup(
     name='django-oauth2-provider',
-    version=oauth2.__version__,
+    version=oauth2_provider.__version__,
     description='Provide OAuth2 access to your app',
     long_description=open('README.rst').read(),
     author='Alen Mujezinovic',
