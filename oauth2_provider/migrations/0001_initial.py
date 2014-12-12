@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                 ('expires', models.DateTimeField(default=utils.get_code_expiry)),
                 ('redirect_uri', models.CharField(max_length=255, blank=True)),
                 ('scope', models.IntegerField(default=0)),
-                ('client', models.ForeignKey(to='oauth2.Client')),
+                ('client', models.ForeignKey(to='oauth2_provider.Client')),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -62,8 +62,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('token', models.CharField(default=utils.long_token, max_length=255)),
                 ('expired', models.BooleanField(default=False)),
-                ('access_token', models.OneToOneField(related_name=b'refresh_token', to='oauth2.AccessToken')),
-                ('client', models.ForeignKey(to='oauth2.Client')),
+                ('access_token', models.OneToOneField(related_name=b'refresh_token', to='oauth2_provider.AccessToken')),
+                ('client', models.ForeignKey(to='oauth2_provider.Client')),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='accesstoken',
             name='client',
-            field=models.ForeignKey(to='oauth2.Client'),
+            field=models.ForeignKey(to='oauth2_provider.Client'),
             preserve_default=True,
         ),
         migrations.AddField(
