@@ -7,10 +7,10 @@ from django.core.urlresolvers import reverse
 from django.utils.html import escape
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .. import constants, scope
-from ..compat import skipIfCustomUser
-from ..templatetags.scope import scopes
-from ..utils import now as date_now
+from . import constants, scope
+from .compat import skipIfCustomUser
+from .templatetags.scope import scopes
+from .utils import now as date_now
 from .forms import ClientForm
 from .models import Client, Grant, AccessToken, RefreshToken
 from .backends import BasicClientBackend, RequestParamsClientBackend

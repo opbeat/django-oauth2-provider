@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-import oauth
+import oauth2
 
 setup(
     name='django-oauth2-provider',

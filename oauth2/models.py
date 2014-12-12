@@ -6,10 +6,10 @@ views in :attr:`provider.views`.
 
 from django.db import models
 from django.conf import settings
-from .. import constants
-from ..constants import CLIENT_TYPES
-from ..utils import now, short_token, long_token, get_code_expiry
-from ..utils import get_token_expiry, serialize_instance, deserialize_instance
+from . import constants
+from .constants import CLIENT_TYPES
+from .utils import now, short_token, long_token, get_code_expiry
+from .utils import get_token_expiry, serialize_instance, deserialize_instance
 from .managers import AccessTokenManager
 
 try:
