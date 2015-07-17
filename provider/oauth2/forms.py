@@ -118,7 +118,7 @@ class AuthorizationRequestForm(ScopeMixin, OAuthForm):
     ``"code"`` or ``"token"`` depending on the grant type.
     """
 
-    redirect_uri = forms.URLField(required=False)
+    redirect_uri = forms.CharField(required=False)
     """
     Where the client would like to redirect the user
     back to. This has to match whatever value was saved while creating

@@ -3,11 +3,11 @@ Default model implementations. Custom database or OAuth backends need to
 implement these models with fields and and methods to be compatible with the
 views in :attr:`provider.views`.
 """
-
+from datetime import timedelta
 from django.db import models
 from django.conf import settings
-from .. import constants
-from ..constants import CLIENT_TYPES
+from .. import constants, scope
+from ..constants import CLIENT_TYPES, CONFIDENTIAL
 from ..utils import now, short_token, long_token, get_code_expiry
 from ..utils import get_token_expiry, serialize_instance, deserialize_instance
 from .managers import AccessTokenManager
@@ -39,14 +39,16 @@ class Client(models.Model):
     user = models.ForeignKey(AUTH_USER_MODEL, related_name='oauth2_client',
         blank=True, null=True)
     name = models.CharField(max_length=255, blank=True)
-    url = models.URLField(help_text="Your application's URL.")
+    url = models.CharField(max_length=200, blank=True, default='', help_text="Your application's URL.")
     redirect_uri = models.URLField(help_text="Your application's callback URL")
     client_id = models.CharField(max_length=255, default=short_token)
     client_secret = models.CharField(max_length=255, default=long_token)
-    client_type = models.IntegerField(choices=CLIENT_TYPES)
+    client_type = models.IntegerField(choices=CLIENT_TYPES, default=CONFIDENTIAL)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
 
     def __unicode__(self):
-        return self.redirect_uri
+        return self.name
 
     def get_default_token_expiry(self):
         public = (self.client_type == 1)
@@ -83,7 +85,7 @@ class Client(models.Model):
 
     class Meta:
         app_label = 'oauth2'
-        db_table = 'oauth2_client'
+        db_table = 'oauth_client'
 
 
 class Grant(models.Model):
@@ -108,13 +110,15 @@ class Grant(models.Model):
     expires = models.DateTimeField(default=get_code_expiry)
     redirect_uri = models.CharField(max_length=255, blank=True)
     scope = models.IntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
 
     def __unicode__(self):
         return self.code
 
     class Meta:
         app_label = 'oauth2'
-        db_table = 'oauth2_grant'
+        db_table = 'oauth_grant'
 
 
 class AccessToken(models.Model):
@@ -137,12 +141,15 @@ class AccessToken(models.Model):
     * :meth:`get_expire_delta` - returns an integer representing seconds to
         expiry
     """
-    user = models.ForeignKey(AUTH_USER_MODEL)
+    user = models.ForeignKey(AUTH_USER_MODEL, null=True, blank=True)
+    organization = models.ForeignKey('organization.Organization', null=True, blank=True)
     token = models.CharField(max_length=255, default=long_token, db_index=True)
     client = models.ForeignKey(Client)
     expires = models.DateTimeField()
     scope = models.IntegerField(default=constants.SCOPES[0][0],
             choices=constants.SCOPES)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
 
     objects = AccessTokenManager()
 
@@ -173,9 +180,16 @@ class AccessToken(models.Model):
         timedelta = expiration - reference
         return timedelta.days*86400 + timedelta.seconds
 
+    def expire_now(self):
+        self.expires = timezone.now() - timedelta(days=1)
+        self.save()
+
+    def get_scope_names(self):
+        return scope.to_names(self.scope)
+
     class Meta:
         app_label = 'oauth2'
-        db_table = 'oauth2_accesstoken'
+        db_table = 'oauth_accesstoken'
 
 
 class RefreshToken(models.Model):
@@ -197,10 +211,12 @@ class RefreshToken(models.Model):
             related_name='refresh_token')
     client = models.ForeignKey(Client)
     expired = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
 
     def __unicode__(self):
         return self.token
 
     class Meta:
         app_label = 'oauth2'
-        db_table = 'oauth2_refreshtoken'
+        db_table = 'oauth_refreshtoken'
