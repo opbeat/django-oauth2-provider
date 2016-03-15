@@ -1,6 +1,9 @@
+from django.utils.datastructures import MultiValueDict
+
 from ..utils import now
 from .forms import ClientAuthForm, PublicPasswordGrantForm
 from .models import AccessToken
+
 
 
 class BaseBackend(object):
@@ -52,8 +55,10 @@ class RequestParamsClientBackend(object):
     def authenticate(self, request=None):
         if request is None:
             return None
-
-        form = ClientAuthForm(request.REQUEST)
+        data = MultiValueDict()
+        data.update(request.GET)
+        data.update(request.POST)
+        form = ClientAuthForm(data)
 
         if form.is_valid():
             return form.cleaned_data.get('client')
@@ -73,8 +78,10 @@ class PublicPasswordBackend(object):
     def authenticate(self, request=None):
         if request is None:
             return None
-
-        form = PublicPasswordGrantForm(request.REQUEST)
+        data = MultiValueDict()
+        data.update(request.GET)
+        data.update(request.POST)
+        form = PublicPasswordGrantForm(data)
 
         if form.is_valid():
             return form.cleaned_data.get('client')
